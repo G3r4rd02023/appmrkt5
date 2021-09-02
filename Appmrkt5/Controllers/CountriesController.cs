@@ -181,6 +181,135 @@ namespace Appmrkt5.Controllers
             _context.Countries.Remove(country);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }       
+        }
+
+        public async Task<IActionResult> AddCity(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Country country = await _context.Countries.FindAsync(id);
+            if (country == null)
+            {
+                return NotFound();
+            }
+
+            City model = new City { IdCountry = country.Id };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCity(City city)
+        {
+            if (ModelState.IsValid)
+            {
+                Country country = await _context.Countries
+                    .Include(c => c.Cities)
+                    .FirstOrDefaultAsync(c => c.Id == city.IdCountry);
+                if (country == null)
+                {
+                    return NotFound();
+                }
+
+                try
+                {
+                    city.Id = 0;
+                    country.Cities.Add(city);
+                    _context.Update(country);
+                    await _context.SaveChangesAsync();                    
+                    return RedirectToAction("Details", new { id = country.Id });
+
+                }
+                catch (DbUpdateException dbUpdateException)
+                {
+                    if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                    {
+                        ModelState.AddModelError(string.Empty, "Ya existe una ciudad con ese nombre.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ModelState.AddModelError(string.Empty, exception.Message);
+                }
+            }
+
+            return View(city);
+        }
+
+        public async Task<IActionResult> EditCity(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            City city = await _context.Cities.FindAsync(id);
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            Country country = await _context.Countries.FirstOrDefaultAsync(c => c.Cities.FirstOrDefault(d => d.Id == city.Id) != null);
+            city.IdCountry = country.Id;
+            return View(city);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCity(City city)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(city);
+                    await _context.SaveChangesAsync();                    
+                    return RedirectToAction("Details", new { id = city.IdCountry });
+                }
+                catch (DbUpdateException dbUpdateException)
+                {
+                    if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                    {
+                        ModelState.AddModelError(string.Empty, "Ya existe una ciudad con ese nombre.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ModelState.AddModelError(string.Empty, exception.Message);
+                }
+            }
+            return View(city);
+        }
+
+        public async Task<IActionResult> DeleteCity(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            City city = await _context.Cities
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (city == null)
+            {
+                return NotFound();
+            }
+
+            Country country = await _context.Countries.FirstOrDefaultAsync(c => c.Cities.FirstOrDefault(d => d.Id == city.Id) != null);
+            _context.Cities.Remove(city);
+            await _context.SaveChangesAsync();           
+            return RedirectToAction("Details", new { id = country.Id });
+        }
     }
 }
