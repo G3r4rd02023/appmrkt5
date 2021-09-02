@@ -1,0 +1,31 @@
+﻿@model Appmrkt5.Models.CountryViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+
+<h4>Editar País</h4>
+<hr />
+<div class="row">
+    <div class="col-md-10">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+
+            <partial name="_Country" />
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                </button>
+                <a asp-action="Index" class="btn btn-success"><i class=" fas fa-undo-alt"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
