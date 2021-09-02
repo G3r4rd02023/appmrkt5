@@ -1,0 +1,35 @@
+﻿@model Appmrkt5.Models.ProductViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+
+<h4><strong>Editar Producto</strong></h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+
+            <partial name="_Product" />
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                </button>
+                <a asp-action="Index" class="btn btn-success"><i class=" fas fa-undo-alt"></i></a>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <img src="@Model.FirstImage" style="width:200px;height:200px;max-width: 100%; height: auto;" />
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
